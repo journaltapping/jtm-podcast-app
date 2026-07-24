@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Journal Tapping Method — Member Audio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1E2E48;
+    --navy-deep:#141F33;
+    --gold:#BDA070;
+    --gold-bright:#D4BA8C;
+    --cream:#F5EDE0;
+    --danger:#C97B63;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--navy);
+    color:var(--cream);
+    font-family:'Nunito',sans-serif;
+    min-height:100vh;
+  }
+  h1,h2,h3{font-family:'Playfair Display',serif;font-weight:700;margin:0;}
+
+  /* ---------- Login screen ---------- */
+  #login-screen{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+  .login-card{
+    background:var(--cream);
+    color:var(--navy);
+    border-radius:16px;
+    padding:40px 36px;
+    max-width:380px;
+    width:100%;
+    box-shadow:0 20px 60px rgba(0,0,0,0.35);
+  }
+  .login-card h1{font-size:1.5rem;margin-bottom:6px;}
+  .login-card p.sub{margin:0 0 28px;font-size:0.95rem;color:#5b6478;}
+  .login-card label{display:block;font-size:0.8rem;font-weight:700;letter-spacing:0.03em;text-transform:uppercase;color:var(--navy);margin-bottom:6px;}
+  .login-card input{
+    width:100%;padding:12px 14px;margin-bottom:18px;border-radius:8px;
+    border:1.5px solid #d8cdb8;font-size:1rem;font-family:'Nunito',sans-serif;
+    background:#fff;color:var(--navy);
+  }
+  .login-card input:focus{outline:2px solid var(--gold);border-color:var(--gold);}
+  .login-card button{
+    width:100%;padding:13px;border:none;border-radius:8px;background:var(--navy);
+    color:var(--gold-bright);font-weight:700;font-size:1rem;cursor:pointer;
+    font-family:'Nunito',sans-serif;transition:background 0.15s;
+  }
+  .login-card button:hover{background:var(--navy-deep);}
+  .login-card button:disabled{opacity:0.6;cursor:default;}
+  .error-msg{color:#a8412e;font-size:0.9rem;margin:-8px 0 16px;min-height:1.1em;}
+
+  /* ---------- App shell ---------- */
+  #app-screen{display:none;min-height:100vh;}
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:20px 28px;border-bottom:1px solid rgba(189,160,112,0.25);
+  }
+  .topbar .brand{font-size:1.15rem;letter-spacing:0.02em;}
+  .topbar .brand span{color:var(--gold-bright);}
+  .logout-link{color:var(--gold);font-size:0.85rem;cursor:pointer;text-decoration:none;border:none;background:none;font-family:'Nunito',sans-serif;}
+
+  .layout{display:flex;flex-wrap:wrap;gap:0;}
+  .sidebar{
+    width:320px;max-width:100%;border-right:1px solid rgba(189,160,112,0.2);
+    padding:24px;min-height:60vh;
+  }
+  .sidebar h2{font-size:1.05rem;color:var(--gold-bright);margin-bottom:16px;}
+  .course-item{
+    padding:14px 16px;border-radius:10px;cursor:pointer;margin-bottom:8px;
+    border:1px solid transparent;transition:background 0.15s, border-color 0.15s;
+  }
+  .course-item:hover{background:rgba(189,160,112,0.08);}
+  .course-item.active{background:rgba(189,160,112,0.14);border-color:var(--gold);}
+  .course-item .ct{font-weight:700;font-size:0.98rem;}
+  .course-item .cd{font-size:0.82rem;color:#c9c2ae;margin-top:4px;}
+
+  .chapters{margin-top:22px;}
+  .chapter-row{
+    display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;
+    cursor:pointer;font-size:0.9rem;
+  }
+  .chapter-row:hover{background:rgba(255,255,255,0.05);}
+  .chapter-row.playing{background:rgba(189,160,112,0.16);}
+  .chapter-num{
+    width:28px;height:28px;border-radius:50%;border:1.5px solid var(--gold);
+    display:flex;align-items:center;justify-content:center;font-size:0.75rem;
+    color:var(--gold-bright);flex-shrink:0;
+  }
+  .chapter-row.done .chapter-num{background:var(--gold);color:var(--navy);}
+
+  .main-panel{flex:1;min-width:280px;padding:40px 32px;display:flex;flex-direction:column;align-items:center;}
+  .now-playing-title{margin-bottom:6px;text-align:center;}
+  .now-playing-course{color:#c9c2ae;font-size:0.9rem;margin-bottom:36px;}
+
+  /* Signature element: vinyl-style progress dial */
+  .dial-wrap{position:relative;width:220px;height:220px;margin-bottom:28px;}
+  .dial-wrap svg{transform:rotate(-90deg);}
+  .dial-track{fill:none;stroke:rgba(189,160,112,0.18);stroke-width:8;}
+  .dial-progress{fill:none;stroke:var(--gold-bright);stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset 0.2s linear;}
+  .play-btn{
+    position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    width:84px;height:84px;border-radius:50%;background:var(--gold-bright);
+    border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 6px 20px rgba(0,0,0,0.35);
+  }
+  .play-btn svg{width:30px;height:30px;fill:var(--navy);}
+
+  .scrub-time{display:flex;justify-content:space-between;width:100%;max-width:420px;font-size:0.8rem;color:#c9c2ae;margin-bottom:6px;}
+  input[type=range]{width:100%;max-width:420px;accent-color:var(--gold-bright);margin-bottom:28px;}
+
+  .empty-state{color:#c9c2ae;text-align:center;padding:60px 20px;font-size:0.95rem;}
+  .empty-state strong{display:block;color:var(--gold-bright);font-family:'Playfair Display',serif;font-size:1.2rem;margin-bottom:8px;}
+
+  @media (max-width:720px){
+    .layout{flex-direction:column;}
+    .sidebar{width:100%;border-right:none;border-bottom:1px solid rgba(189,160,112,0.2);}
+  }
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-card">
+    <h1>Member Audio</h1>
+    <p class="sub">The Journal Tapping Method — private course listening</p>
+    <label for="email">Email</label>
+    <input id="email" type="email" autocomplete="username">
+    <label for="password">Password</label>
+    <input id="password" type="password" autocomplete="current-password">
+    <div class="error-msg" id="login-error"></div>
+    <button id="login-btn" onclick="handleLogin()">Log in</button>
+  </div>
+</div>
+
+<div id="app-screen">
+  <div class="topbar">
+    <div class="brand">The Journal Tapping <span>Method</span></div>
+    <button class="logout-link" onclick="handleLogout()">Log out</button>
+  </div>
+  <div class="layout">
+    <div class="sidebar">
+      <h2>Your Courses</h2>
+      <div id="course-list"></div>
+      <div class="chapters" id="chapter-list"></div>
+    </div>
+    <div class="main-panel" id="main-panel">
+      <div class="empty-state">
+        <strong>Choose a course to begin</strong>
+        Pick a course on the left, then tap a module to start listening.
+      </div>
+    </div>
+  </div>
+</div>
+
+<audio id="audio-el"></audio>
+
+<script>
+// ---- Config ----
+const FN = ''; // same-origin Netlify functions, e.g. '/.netlify/functions'
+
+let state = {
+  email: null,
+  name: null,
+  courses: [],
+  activeCourseId: null,
+  activeEpisode: null,
+};
+
+function fnUrl(name){ return `${FN}/.netlify/functions/${name}`; }
+
+// ---- Auth ----
+async function handleLogin(){
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const btn = document.getElementById('login-btn');
+  const errEl = document.getElementById('login-error');
+  errEl.textContent = '';
+
+  if(!email || !password){
+    errEl.textContent = 'Please enter your email and password.';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Logging in…';
+
+  try{
+    const res = await fetch(fnUrl('podcast-login'), {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await res.json();
+    if(!res.ok || !data.ok){
+      errEl.textContent = data.error || 'Login failed. Please try again.';
+      btn.disabled = false;
+      btn.textContent = 'Log in';
+      return;
+    }
+    state.email = data.email;
+    state.name = data.name;
+    localStorage.setItem('jtm_podcast_session', JSON.stringify({ email: data.email, name: data.name }));
+    showApp();
+  }catch(e){
+    errEl.textContent = 'Something went wrong. Please try again.';
+    btn.disabled = false;
+    btn.textContent = 'Log in';
+  }
+}
+
+function handleLogout(){
+  localStorage.removeItem('jtm_podcast_session');
+  state = { email:null, name:null, courses:[], activeCourseId:null, activeEpisode:null };
+  document.getElementById('audio-el').pause();
+  document.getElementById('app-screen').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+}
+
+async function showApp(){
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display = 'block';
+  await loadCourses();
+}
+
+// ---- Data ----
+async function loadCourses(){
+  try{
+    const res = await fetch(fnUrl(`podcast-courses?email=${encodeURIComponent(state.email)}`));
+    const data = await res.json();
+    if(data.ok){
+      state.courses = data.courses;
+      renderCourseList();
+    }
+  }catch(e){
+    document.getElementById('course-list').innerHTML = '<div class="empty-state">Could not load courses. Please refresh.</div>';
+  }
+}
+
+function renderCourseList(){
+  const list = document.getElementById('course-list');
+  list.innerHTML = '';
+  state.courses.forEach(course => {
+    const div = document.createElement('div');
+    div.className = 'course-item' + (course.id === state.activeCourseId ? ' active' : '');
+    div.innerHTML = `<div class="ct">${escapeHtml(course.title)}</div><div class="cd">${course.episodes.length} module${course.episodes.length===1?'':'s'}</div>`;
+    div.onclick = () => selectCourse(course.id);
+    list.appendChild(div);
+  });
+}
+
+function selectCourse(courseId){
+  state.activeCourseId = courseId;
+  renderCourseList();
+  renderChapterList();
+}
+
+function renderChapterList(){
+  const wrap = document.getElementById('chapter-list');
+  wrap.innerHTML = '';
+  const course = state.courses.find(c => c.id === state.activeCourseId);
+  if(!course) return;
+
+  course.episodes
+    .sort((a,b) => a.module_number - b.module_number)
+    .forEach(ep => {
+      const row = document.createElement('div');
+      const done = ep.progress && ep.progress.completed;
+      row.className = 'chapter-row' + (done ? ' done' : '') + (state.activeEpisode && state.activeEpisode.id===ep.id ? ' playing' : '');
+      row.innerHTML = `<div class="chapter-num">${done ? '✓' : ep.module_number}</div><div>${escapeHtml(ep.title)}</div>`;
+      row.onclick = () => playEpisode(ep, course);
+      wrap.appendChild(row);
+    });
+}
+
+// ---- Player ----
+function playEpisode(ep, course){
+  state.activeEpisode = ep;
+  renderChapterList();
+  renderPlayer(ep, course);
+
+  const audio = document.getElementById('audio-el');
+  if(ep.audio_url){
+    audio.src = ep.audio_url;
+    if(ep.progress && ep.progress.position_seconds){
+      audio.currentTime = ep.progress.position_seconds;
+    }
+    audio.play().catch(()=>{});
+  }
+}
+
+function renderPlayer(ep, course){
+  const panel = document.getElementById('main-panel');
+  panel.innerHTML = `
+    <h3 class="now-playing-title">${escapeHtml(ep.title)}</h3>
+    <div class="now-playing-course">${escapeHtml(course.title)} · Module ${ep.module_number}</div>
+    <div class="dial-wrap">
+      <svg width="220" height="220" viewBox="0 0 220 220">
+        <circle class="dial-track" cx="110" cy="110" r="96"></circle>
+        <circle class="dial-progress" id="dial-progress" cx="110" cy="110" r="96"
+          stroke-dasharray="603" stroke-dashoffset="603"></circle>
+      </svg>
+      <button class="play-btn" id="play-pause-btn" onclick="togglePlay()">
+        <svg id="play-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+    </div>
+    <div class="scrub-time"><span id="cur-time">0:00</span><span id="dur-time">0:00</span></div>
+    <input type="range" id="scrub" min="0" max="100" value="0" oninput="seek(this.value)">
+    ${!ep.audio_url ? '<div class="empty-state">Audio for this module hasn\'t been uploaded yet.</div>' : ''}
+  `;
+}
+
+function togglePlay(){
+  const audio = document.getElementById('audio-el');
+  if(audio.paused){ audio.play().catch(()=>{}); } else { audio.pause(); }
+}
+
+function seek(val){
+  const audio = document.getElementById('audio-el');
+  if(audio.duration){
+    audio.currentTime = (val/100) * audio.duration;
+  }
+}
+
+function fmtTime(sec){
+  if(!isFinite(sec)) return '0:00';
+  const m = Math.floor(sec/60), s = Math.floor(sec%60);
+  return `${m}:${s.toString().padStart(2,'0')}`;
+}
+
+const audioEl = document.getElementById('audio-el');
+const DIAL_CIRC = 603;
+
+audioEl.addEventListener('play', () => {
+  const icon = document.getElementById('play-icon');
+  if(icon) icon.innerHTML = '<path d="M6 5h4v14H6zM14 5h4v14h-4z"/>';
+});
+audioEl.addEventListener('pause', () => {
+  const icon = document.getElementById('play-icon');
+  if(icon) icon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+});
+audioEl.addEventListener('timeupdate', () => {
+  if(!audioEl.duration) return;
+  const pct = audioEl.currentTime / audioEl.duration;
+  const dial = document.getElementById('dial-progress');
+  if(dial) dial.style.strokeDashoffset = DIAL_CIRC * (1 - pct);
+  const scrub = document.getElementById('scrub');
+  if(scrub) scrub.value = pct * 100;
+  const curEl = document.getElementById('cur-time');
+  const durEl = document.getElementById('dur-time');
+  if(curEl) curEl.textContent = fmtTime(audioEl.currentTime);
+  if(durEl) durEl.textContent = fmtTime(audioEl.duration);
+});
+audioEl.addEventListener('pause', saveProgress);
+audioEl.addEventListener('ended', () => saveProgress(true));
+
+function saveProgress(completed){
+  if(!state.activeEpisode || !state.email) return;
+  fetch(fnUrl('podcast-progress'), {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      email: state.email,
+      episode_id: state.activeEpisode.id,
+      position_seconds: Math.floor(audioEl.currentTime || 0),
+      completed: !!completed,
+    }),
+  }).catch(()=>{});
+}
+
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+// ---- Restore session on load ----
+(function init(){
+  const saved = localStorage.getItem('jtm_podcast_session');
+  if(saved){
+    try{
+      const parsed = JSON.parse(saved);
+      state.email = parsed.email;
+      state.name = parsed.name;
+      showApp();
+    }catch(e){}
+  }
+})();
+</script>
+</body>
+</html>
