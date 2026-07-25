@@ -47,3 +47,35 @@ matching `course_id`. It'll show up in the sidebar automatically.
 ## What's NOT built yet (on purpose, per your answers)
 - Skool → Supabase automation (Zapier/webhook) — flagged for later, so members are added manually for now
 - Payment/checkout — not needed, since access comes via Skool membership, not a separate purchase
+
+## Ongoing: adding a new episode to an existing course
+No code changes ever needed - just two steps:
+1. Upload the audio file to the `jtm-podcast-audio` R2 bucket → copy its public link
+2. Supabase → Table Editor → `podcast_episodes` → **Insert row**:
+   - `id`: unique code, e.g. `jtm-signature-method-04`
+   - `course_id`: must exactly match the course it belongs to, e.g. `jtm-signature-method`
+   - `title`: the real module name members will see
+   - `module_number`: `4`, `5`, `6`... (controls play order)
+   - `audio_url`: paste the R2 link
+   - `duration_seconds`: optional, can leave blank
+
+Refresh the app afterward - it reads courses fresh every time someone logs in.
+
+## Ongoing: adding a whole new course
+1. Design/upload a thumbnail (square, used in sidebar + home cards) and optionally a
+   banner (wide image, used on the course's own page - falls back to a plain style if left blank)
+   to the R2 bucket
+2. Supabase → `podcast_courses` → **Insert row**:
+   - `id`: unique code, e.g. `nervous-system-lens`
+   - `title`, `description`
+   - `thumbnail_url`: the square cover image link
+   - `banner_url`: the wide banner image link (optional)
+   - `sort_order`: `2`, `3`... (controls order shown)
+3. Add its episodes the same way as above, using this course's `id` as the `course_id`
+
+## Renaming a course or episode ID later
+Titles are safe to edit directly in Table Editor any time. IDs are different - they're
+referenced by other tables (episodes reference their course's id, progress records
+reference episode ids), so renaming an id needs a small SQL script rather than a plain
+cell edit, or it'll error. Ask me for one whenever you need it - it's a quick, safe script
+each time.
