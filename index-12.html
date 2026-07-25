@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Journal Tapping Method — Member Audio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#16233A;
+    --navy-deep:#0F1826;
+    --navy-panel:#1B2C46;
+    --gold:#BDA070;
+    --gold-bright:#D4BA8C;
+    --cream:#F5EDE0;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--cream);color:var(--navy);font-family:'Nunito',sans-serif;min-height:100vh;}
+  h1,h2,h3{font-family:'Playfair Display',serif;font-weight:700;margin:0;}
+
+  #login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--cream);}
+  .login-card{background:#fff;color:var(--navy);border-radius:16px;padding:40px 36px;max-width:380px;width:100%;box-shadow:0 10px 40px rgba(30,46,72,0.12);border:1px solid rgba(189,160,112,0.25);}
+  .login-card h1{font-size:1.5rem;margin-bottom:6px;}
+  .login-card p.sub{margin:0 0 28px;font-size:0.95rem;color:#6b7284;}
+  .login-card label{display:block;font-size:0.8rem;font-weight:700;letter-spacing:0.03em;text-transform:uppercase;color:var(--navy);margin-bottom:6px;}
+  .login-card input{width:100%;padding:12px 14px;margin-bottom:18px;border-radius:8px;border:1.5px solid #e3d9c4;font-size:1rem;font-family:'Nunito',sans-serif;background:var(--cream);color:var(--navy);}
+  .login-card input:focus{outline:2px solid var(--gold);border-color:var(--gold);}
+  .login-card button{width:100%;padding:13px;border:none;border-radius:8px;background:var(--navy);color:var(--gold-bright);font-weight:700;font-size:1rem;cursor:pointer;font-family:'Nunito',sans-serif;}
+  .login-card button:hover{background:var(--navy-deep);}
+  .login-card button:disabled{opacity:0.6;}
+  .error-msg{color:#a8412e;font-size:0.9rem;margin:-8px 0 16px;min-height:1.1em;}
+
+  #app-screen{display:none;min-height:100vh;}
+  .app-body{display:flex;}
+
+  .library{width:230px;flex-shrink:0;background:var(--navy);padding:20px 14px;min-height:100vh;border-right:1px solid rgba(189,160,112,0.25);}
+  .library .brand{font-size:1rem;padding:0 6px 20px;color:var(--gold-bright);letter-spacing:0.02em;font-family:'Playfair Display',serif;font-weight:700;}
+  .library h2{font-size:0.72rem;text-transform:uppercase;letter-spacing:0.08em;color:#a9b3c9;padding:0 6px;margin-bottom:10px;}
+  .lib-item{display:flex;align-items:center;gap:10px;padding:8px 6px;border-radius:8px;cursor:pointer;}
+  .lib-item:hover, .lib-item.active{background:rgba(189,160,112,0.18);}
+  .lib-item img, .lib-item .ph{width:40px;height:40px;border-radius:6px;object-fit:cover;background:var(--navy-panel);flex-shrink:0;}
+  .lib-item .ttl{font-size:0.85rem;font-weight:700;line-height:1.2;color:var(--cream);}
+  .lib-item .sub{font-size:0.72rem;color:#a9b3c9;}
+  .logout-link{display:block;margin-top:24px;color:var(--gold-bright);opacity:0.85;font-size:0.8rem;cursor:pointer;background:none;border:none;padding:8px 6px;font-family:'Nunito',sans-serif;}
+
+  .main{flex:1;min-width:0;padding-bottom:100px;background:var(--cream);}
+
+  .banner{display:flex;align-items:flex-end;gap:24px;padding:48px 40px 28px;background:linear-gradient(135deg, var(--navy) 0%, var(--navy-panel) 100%);border-bottom:3px solid var(--gold);}
+  .banner img, .banner .ph{width:180px;height:180px;border-radius:10px;object-fit:cover;box-shadow:0 12px 30px rgba(0,0,0,0.35);background:var(--cream);flex-shrink:0;border:3px solid var(--gold);}
+  .banner .ph{display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:2.5rem;}
+  .banner-info .kicker{font-size:0.78rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--gold-bright);font-weight:700;margin-bottom:8px;}
+  .banner-info h1{font-size:2.2rem;line-height:1.1;color:var(--cream);}
+  .banner-info p{color:#c9c2ae;font-size:0.95rem;margin-top:10px;max-width:520px;}
+
+  .tracklist{padding:16px 40px 40px;background:linear-gradient(180deg, rgba(22,35,58,0.04) 0%, transparent 60px);}
+  .track-row{display:grid;grid-template-columns:32px 1fr auto;align-items:center;gap:16px;padding:10px 12px;border-radius:8px;cursor:pointer;border-left:3px solid transparent;}
+  .track-row:hover{background:#fff;border-left-color:rgba(189,160,112,0.4);}
+  .track-row.active{background:rgba(189,160,112,0.22);border-left-color:var(--gold);}
+  .track-num{color:#9a8a6a;font-size:0.9rem;text-align:center;}
+  .track-row.active .track-num{color:var(--navy);font-weight:700;}
+  .track-row.done .track-num::after{content:' ✓';color:var(--gold);}
+  .track-title{font-weight:700;font-size:0.95rem;color:var(--navy);}
+  .track-meta{font-size:0.78rem;color:#9a8a6a;margin-top:2px;}
+  .track-dur{color:#8b7d63;font-size:0.85rem;}
+
+  .empty-state{color:#6b7284;text-align:center;padding:80px 20px;font-size:0.95rem;}
+  .empty-state strong{display:block;color:var(--navy);font-family:'Playfair Display',serif;font-size:1.3rem;margin-bottom:8px;}
+
+  /* Home view */
+  .hero{padding:0;line-height:0;}
+  .hero img{width:100%;display:block;}
+  .hero .welcome-strip{background:var(--cream);padding:14px 40px;font-size:0.9rem;color:var(--navy);border-bottom:1px solid rgba(189,160,112,0.25);}
+  .home-courses{padding:36px 40px 40px;}
+  .home-courses h2{font-size:1.1rem;color:var(--navy);margin-bottom:6px;font-family:'Playfair Display',serif;}
+  .home-courses .divider{width:60px;height:2px;background:var(--gold);margin-bottom:20px;}
+  .course-grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(180px, 1fr));gap:20px;}
+  .course-card{background:#fff;border:1.5px solid var(--navy);border-radius:12px;padding:16px;cursor:pointer;transition:transform 0.12s, box-shadow 0.12s;position:relative;}
+  .course-card::before{content:'';position:absolute;top:-1.5px;left:-1.5px;right:-1.5px;height:4px;background:var(--gold);border-radius:12px 12px 0 0;}
+  .course-card:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(22,35,58,0.2);}
+  .course-card img, .course-card .ph{width:100%;aspect-ratio:1;border-radius:8px;object-fit:cover;margin-bottom:12px;background:var(--cream);}
+  .course-card .ph{display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:2rem;}
+  .course-card .cc-title{font-weight:700;color:var(--navy);font-size:0.95rem;}
+  .course-card .cc-sub{color:#9a8a6a;font-size:0.78rem;margin-top:4px;}
+
+  .player-bar{position:fixed;bottom:0;left:0;right:0;height:84px;background:var(--navy);border-top:2px solid var(--gold);display:none;align-items:center;gap:16px;padding:0 24px;z-index:10;}
+  .player-bar.visible{display:flex;}
+  .player-bar img, .player-bar .ph{width:56px;height:56px;border-radius:6px;object-fit:cover;background:var(--navy-panel);flex-shrink:0;}
+  .player-meta{width:200px;flex-shrink:0;}
+  .player-meta .pt{font-weight:700;font-size:0.88rem;color:var(--cream);}
+  .player-meta .pc{font-size:0.75rem;color:#a9b3c9;}
+  .player-controls{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;max-width:520px;margin:0 auto;}
+  .play-toggle{width:38px;height:38px;border-radius:50%;background:var(--gold-bright);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .play-toggle svg{width:16px;height:16px;fill:var(--navy);}
+  .scrub-row{display:flex;align-items:center;gap:8px;width:100%;}
+  .scrub-row span{font-size:0.72rem;color:#a9b3c9;width:34px;text-align:center;}
+  input[type=range]{width:100%;accent-color:var(--gold);}
+
+  @media (max-width:720px){
+    .library{width:80px;}
+    .library .brand, .library h2, .lib-item .ttl, .lib-item .sub{display:none;}
+    .lib-item{justify-content:center;}
+    .banner{flex-direction:column;align-items:flex-start;padding:32px 20px;}
+    .tracklist{padding:16px 20px 40px;}
+    .player-meta{width:120px;}
+  }
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-card">
+    <h1>Member Audio</h1>
+    <p class="sub">The Journal Tapping Method — private course listening</p>
+    <label for="email">Email</label>
+    <input id="email" type="email" autocomplete="username">
+    <label for="password">Password</label>
+    <input id="password" type="password" autocomplete="current-password">
+    <div class="error-msg" id="login-error"></div>
+    <button id="login-btn" onclick="handleLogin()">Log in</button>
+  </div>
+</div>
+
+<div id="app-screen">
+  <div class="app-body">
+    <div class="library">
+      <div class="brand" style="cursor:pointer;" onclick="renderHome()">JTM Audio</div>
+      <h2>Your Courses</h2>
+      <div id="course-list"></div>
+      <button class="logout-link" onclick="handleLogout()">Log out</button>
+    </div>
+    <div class="main" id="main-panel"></div>
+  </div>
+</div>
+
+<div class="player-bar" id="player-bar">
+  <div id="player-art"></div>
+  <div class="player-meta">
+    <div class="pt" id="player-title">—</div>
+    <div class="pc" id="player-course">—</div>
+  </div>
+  <div class="player-controls">
+    <button class="play-toggle" id="play-pause-btn" onclick="togglePlay()">
+      <svg id="play-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+    </button>
+    <div class="scrub-row">
+      <span id="cur-time">0:00</span>
+      <input type="range" id="scrub" min="0" max="100" value="0" oninput="seek(this.value)">
+      <span id="dur-time">0:00</span>
+    </div>
+  </div>
+</div>
+
+<audio id="audio-el"></audio>
+
+<script>
+const FN = '';
+// Swap this for your R2 link once the banner image is uploaded there
+const HERO_IMAGE_URL = 'https://pub-e6016fb3e7ac4f34bc87edaa8a532265.r2.dev/ChatGPT%20Image%20Jul%2025%2C%202026%20at%2011_01_47%20PM.png';
+let state = { email:null, name:null, courses:[], activeCourseId:null, activeEpisode:null };
+function fnUrl(name){ return `${FN}/.netlify/functions/${name}`; }
+
+async function handleLogin(){
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const btn = document.getElementById('login-btn');
+  const errEl = document.getElementById('login-error');
+  errEl.textContent = '';
+  if(!email || !password){ errEl.textContent = 'Please enter your email and password.'; return; }
+  btn.disabled = true; btn.textContent = 'Logging in…';
+  try{
+    const res = await fetch(fnUrl('podcast-login'), {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await res.json();
+    if(!res.ok || !data.ok){
+      errEl.textContent = data.error || 'Login failed. Please try again.';
+      btn.disabled = false; btn.textContent = 'Log in';
+      return;
+    }
+    state.email = data.email; state.name = data.name;
+    localStorage.setItem('jtm_podcast_session', JSON.stringify({ email: data.email, name: data.name }));
+    showApp();
+  }catch(e){
+    errEl.textContent = 'Something went wrong. Please try again.';
+    btn.disabled = false; btn.textContent = 'Log in';
+  }
+}
+
+function handleLogout(){
+  localStorage.removeItem('jtm_podcast_session');
+  state = { email:null, name:null, courses:[], activeCourseId:null, activeEpisode:null };
+  document.getElementById('audio-el').pause();
+  document.getElementById('player-bar').classList.remove('visible');
+  document.getElementById('app-screen').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+}
+
+async function showApp(){
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display = 'block';
+  await loadCourses();
+}
+
+async function loadCourses(){
+  try{
+    const res = await fetch(fnUrl(`podcast-courses?email=${encodeURIComponent(state.email)}`));
+    const data = await res.json();
+    if(data.ok){ state.courses = data.courses; renderCourseList(); renderHome(); }
+  }catch(e){
+    document.getElementById('course-list').innerHTML = '<div class="empty-state">Could not load courses.</div>';
+  }
+}
+
+function renderHome(){
+  state.activeCourseId = null;
+  renderCourseList();
+  const firstName = (state.name || '').split(' ')[0];
+  const cards = state.courses.map(course => {
+    const art = course.thumbnail_url ? `<img src="${course.thumbnail_url}" alt="">` : `<div class="ph">♪</div>`;
+    return `
+      <div class="course-card" data-course="${course.id}">
+        ${art}
+        <div class="cc-title">${escapeHtml(course.title)}</div>
+        <div class="cc-sub">${course.episodes.length} module${course.episodes.length===1?'':'s'}</div>
+      </div>`;
+  }).join('');
+
+  const panel = document.getElementById('main-panel');
+  panel.innerHTML = `
+    <div class="hero">
+      <img src="${HERO_IMAGE_URL}" alt="The Journal Tapping Method — Private Podcast">
+      ${firstName ? `<div class="welcome-strip">Welcome back, ${escapeHtml(firstName)}.</div>` : ''}
+    </div>
+    <div class="home-courses">
+      <h2>Your Courses</h2>
+      <div class="divider"></div>
+      <div class="course-grid">${cards || '<div class="empty-state">No courses added yet.</div>'}</div>
+    </div>
+  `;
+  panel.querySelectorAll('.course-card').forEach(card => {
+    card.addEventListener('click', () => selectCourse(card.dataset.course));
+  });
+}
+
+function renderCourseList(){
+  const list = document.getElementById('course-list');
+  list.innerHTML = '';
+  state.courses.forEach(course => {
+    const div = document.createElement('div');
+    div.className = 'lib-item' + (course.id === state.activeCourseId ? ' active' : '');
+    const art = course.thumbnail_url
+      ? `<img src="${course.thumbnail_url}" alt="">`
+      : `<div class="ph"></div>`;
+    div.innerHTML = `${art}<div><div class="ttl">${escapeHtml(course.title)}</div><div class="sub">${course.episodes.length} module${course.episodes.length===1?'':'s'}</div></div>`;
+    div.onclick = () => selectCourse(course.id);
+    list.appendChild(div);
+  });
+}
+
+function selectCourse(courseId){
+  state.activeCourseId = courseId;
+  renderCourseList();
+  renderMain();
+}
+
+function renderMain(){
+  const course = state.courses.find(c => c.id === state.activeCourseId);
+  const panel = document.getElementById('main-panel');
+  if(!course){ panel.innerHTML = '<div class="empty-state"><strong>Choose a course</strong></div>'; return; }
+
+  const art = course.thumbnail_url
+    ? `<img src="${course.thumbnail_url}" alt="">`
+    : `<div class="ph">♪</div>`;
+
+  const rows = course.episodes
+    .sort((a,b) => a.module_number - b.module_number)
+    .map(ep => {
+      const done = ep.progress && ep.progress.completed;
+      const active = state.activeEpisode && state.activeEpisode.id === ep.id;
+      return `
+        <div class="track-row ${done?'done':''} ${active?'active':''}" data-ep="${ep.id}">
+          <div class="track-num">${ep.module_number}</div>
+          <div>
+            <div class="track-title">${escapeHtml(ep.title)}</div>
+            <div class="track-meta">${ep.audio_url ? '' : 'Audio not uploaded yet'}</div>
+          </div>
+          <div class="track-dur">${ep.duration_seconds ? fmtTime(ep.duration_seconds) : ''}</div>
+        </div>`;
+    }).join('');
+
+  panel.innerHTML = `
+    <div class="banner">
+      ${art}
+      <div class="banner-info">
+        <div class="kicker">Course</div>
+        <h1>${escapeHtml(course.title)}</h1>
+        <p>${escapeHtml(course.description || '')}</p>
+      </div>
+    </div>
+    <div class="tracklist">${rows}</div>
+  `;
+
+  panel.querySelectorAll('.track-row').forEach(row => {
+    row.addEventListener('click', () => {
+      const ep = course.episodes.find(e => e.id === row.dataset.ep);
+      playEpisode(ep, course);
+    });
+  });
+}
+
+function playEpisode(ep, course){
+  state.activeEpisode = ep;
+  renderMain();
+
+  const bar = document.getElementById('player-bar');
+  bar.classList.add('visible');
+  document.getElementById('player-title').textContent = ep.title;
+  document.getElementById('player-course').textContent = course.title;
+  document.getElementById('player-art').innerHTML = course.thumbnail_url
+    ? `<img src="${course.thumbnail_url}" alt="">` : `<div class="ph"></div>`;
+
+  const audio = document.getElementById('audio-el');
+  if(ep.audio_url){
+    audio.src = ep.audio_url;
+    if(ep.progress && ep.progress.position_seconds){ audio.currentTime = ep.progress.position_seconds; }
+    audio.play().catch(()=>{});
+  }
+}
+
+function togglePlay(){
+  const audio = document.getElementById('audio-el');
+  if(audio.paused){ audio.play().catch(()=>{}); } else { audio.pause(); }
+}
+function seek(val){
+  const audio = document.getElementById('audio-el');
+  if(audio.duration){ audio.currentTime = (val/100) * audio.duration; }
+}
+function fmtTime(sec){
+  if(!isFinite(sec)) return '0:00';
+  const m = Math.floor(sec/60), s = Math.floor(sec%60);
+  return `${m}:${s.toString().padStart(2,'0')}`;
+}
+
+const audioEl = document.getElementById('audio-el');
+audioEl.addEventListener('play', () => {
+  document.getElementById('play-icon').innerHTML = '<path d="M6 5h4v14H6zM14 5h4v14h-4z"/>';
+});
+audioEl.addEventListener('pause', () => {
+  document.getElementById('play-icon').innerHTML = '<path d="M8 5v14l11-7z"/>';
+});
+audioEl.addEventListener('timeupdate', () => {
+  if(!audioEl.duration) return;
+  const pct = audioEl.currentTime / audioEl.duration;
+  const scrub = document.getElementById('scrub');
+  if(scrub) scrub.value = pct * 100;
+  document.getElementById('cur-time').textContent = fmtTime(audioEl.currentTime);
+  document.getElementById('dur-time').textContent = fmtTime(audioEl.duration);
+});
+audioEl.addEventListener('pause', () => saveProgress(false));
+audioEl.addEventListener('ended', () => saveProgress(true));
+
+function saveProgress(completed){
+  if(!state.activeEpisode || !state.email) return;
+  fetch(fnUrl('podcast-progress'), {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      email: state.email, episode_id: state.activeEpisode.id,
+      position_seconds: Math.floor(audioEl.currentTime || 0), completed: !!completed,
+    }),
+  }).catch(()=>{});
+}
+
+function escapeHtml(str){
+  const d = document.createElement('div'); d.textContent = str; return d.innerHTML;
+}
+
+(function init(){
+  const saved = localStorage.getItem('jtm_podcast_session');
+  if(saved){
+    try{ const parsed = JSON.parse(saved); state.email = parsed.email; state.name = parsed.name; showApp(); }catch(e){}
+  }
+})();
+</script>
+</body>
+</html>
